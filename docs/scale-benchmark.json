@@ -1,0 +1,35 @@
+{
+    "additional_orders": 50000,
+    "database": "MySQL",
+    "peak_php_mb": 26,
+    "results": {
+        "dashboard": {
+            "p50_ms": 57.22,
+            "max_ms": 86.52,
+            "json_bytes": 4046,
+            "sql_queries": 7,
+            "returned_rows": 5
+        },
+        "orders_first": {
+            "p50_ms": 15.2,
+            "max_ms": 17.52,
+            "json_bytes": 6482,
+            "sql_queries": 6,
+            "returned_rows": 10
+        },
+        "orders_deep": {
+            "p50_ms": 21.72,
+            "max_ms": 41.67,
+            "json_bytes": 6482,
+            "sql_queries": 6,
+            "returned_rows": 10
+        },
+        "earnings": {
+            "p50_ms": 92.65,
+            "max_ms": 96.12,
+            "json_bytes": 6851,
+            "sql_queries": 10,
+            "returned_rows": 20
+        }
+    }
+}
