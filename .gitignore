@@ -6,6 +6,7 @@ dist/
 backend/vendor/
 backend/.env*
 !backend/.env.example
+!backend/.env.production.example
 backend/database/*.sqlite*
 backend/storage/logs/*
 backend/storage/framework/cache/data/*

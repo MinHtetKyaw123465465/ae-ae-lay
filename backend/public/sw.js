@@ -1,7 +1,7 @@
 /* Cache public application assets only. Authenticated API data is never cached. */
-const BUILD_ID = 'index-7AlG3MlWjs-index-Ds0FkOu-css';
+const BUILD_ID = 'index-BIX6x14-js-index-COtUdRe8css';
 const CACHE = 'aeae-static-' + BUILD_ID;
-const STATIC_ASSETS = ["/assets/index-7AlG3MlW.js","/assets/index-Ds0FkOu-.css"];
+const STATIC_ASSETS = ["/assets/index-BIX6x14-.js","/assets/index-COtUdRe8.css"];
 const CORE = ['/offline.html','/offline.css','/manifest.webmanifest','/icons/aeae-180.png','/icons/aeae-192.png','/icons/aeae-512.png','/fonts/fonts.css','/fonts/noto-myanmar-400.ttf'];
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll([...CORE,...STATIC_ASSETS])).then(()=>self.skipWaiting()));});
 self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('aeae-static-')&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));});
@@ -22,7 +22,7 @@ self.addEventListener('push',event=>{event.waitUntil((async()=>{
  // A shared device must not display a previous account's notifications.
  try{const response=await fetch('/api/me',{credentials:'include',cache:'no-store'});if(!response.ok)return;const me=await response.json();if(me.id!==data.recipient_id)return;}catch{return;}
  const allowed=['dashboard','orders','agents','earnings'];const destination=allowed.includes(data.destination)?data.destination:'dashboard';
- await self.registration.showNotification(String(data.title||'အဲအဲလေး'),{body:String(data.body||'အသိပေးချက်အသစ် ရှိသည်။'),icon:'/icons/aeae-192.png',badge:'/icons/aeae-192.png',tag:'aeae-'+data.id,renotify:false,data:{destination,resource_id:Number(data.resource_id)||null,id:data.id}});
+ await self.registration.showNotification(String(data.title||'Ae Ae Business'),{body:String(data.body||'အသိပေးချက်အသစ် ရှိသည်။'),icon:'/icons/aeae-192.png',badge:'/icons/aeae-192.png',tag:'aeae-'+data.id,renotify:false,data:{destination,resource_id:Number(data.resource_id)||null,id:data.id}});
  const clients=await self.clients.matchAll({type:'window',includeUncontrolled:true});clients.forEach(client=>client.postMessage({type:'NOTIFICATION_RECEIVED'}));
 })());});
 self.addEventListener('notificationclick',event=>{event.notification.close();event.waitUntil((async()=>{

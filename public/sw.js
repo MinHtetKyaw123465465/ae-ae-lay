@@ -22,7 +22,7 @@ self.addEventListener('push',event=>{event.waitUntil((async()=>{
  // A shared device must not display a previous account's notifications.
  try{const response=await fetch('/api/me',{credentials:'include',cache:'no-store'});if(!response.ok)return;const me=await response.json();if(me.id!==data.recipient_id)return;}catch{return;}
  const allowed=['dashboard','orders','agents','earnings'];const destination=allowed.includes(data.destination)?data.destination:'dashboard';
- await self.registration.showNotification(String(data.title||'အဲအဲလေး'),{body:String(data.body||'အသိပေးချက်အသစ် ရှိသည်။'),icon:'/icons/aeae-192.png',badge:'/icons/aeae-192.png',tag:'aeae-'+data.id,renotify:false,data:{destination,resource_id:Number(data.resource_id)||null,id:data.id}});
+ await self.registration.showNotification(String(data.title||'Ae Ae Business'),{body:String(data.body||'အသိပေးချက်အသစ် ရှိသည်။'),icon:'/icons/aeae-192.png',badge:'/icons/aeae-192.png',tag:'aeae-'+data.id,renotify:false,data:{destination,resource_id:Number(data.resource_id)||null,id:data.id}});
  const clients=await self.clients.matchAll({type:'window',includeUncontrolled:true});clients.forEach(client=>client.postMessage({type:'NOTIFICATION_RECEIVED'}));
 })());});
 self.addEventListener('notificationclick',event=>{event.notification.close();event.waitUntil((async()=>{

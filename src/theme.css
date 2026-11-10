@@ -418,3 +418,7 @@ body { background:#f3f6fb; }
 @media(max-width:760px){.notification-panel{top:60px;right:15px}.device-feature-row>div{font-size:11px}.notification-panel .notice{padding:13px 15px}.auth-card .remember-row input{font-size:16px}.notification-panel .pagination{border-radius:0}}
 .auth-install { min-height:40px; }
 .remember-row { min-height:30px; }
+/* Let the longer business name fit the sidebar and narrow screens. */
+.brand > div { min-width: 0; }
+.brand strong { font-size: 20px; line-height: 1.4; letter-spacing: -.4px; white-space: normal; }
+.brand.small strong { font-size: 22px; }
