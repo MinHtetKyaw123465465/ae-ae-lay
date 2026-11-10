@@ -1,0 +1,17 @@
+{
+  "id": "/",
+  "name": "အဲအဲလေး",
+  "short_name": "အဲအဲလေး",
+  "description": "အော်ဒါနှင့် ကော်မရှင်စာရင်း",
+  "lang": "my",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "theme_color": "#163e70",
+  "background_color": "#f3f6fb",
+  "icons": [
+    { "src": "/icons/aeae-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/icons/aeae-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

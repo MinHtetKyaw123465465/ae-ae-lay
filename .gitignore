@@ -15,18 +15,10 @@ playwright-report/
 test-results/
 *.png
 
-backend/public/assets/
-backend/public/fonts/
-backend/public/products/
-backend/public/index.html
-
 backups/
 *.sql
 *.sql.gz
 
 !public/icons/*.png
-backend/public/icons/
-backend/public/sw.js
-backend/public/manifest.webmanifest
-backend/public/offline.html
-backend/public/offline.css
+# Include frontend build output copied into Laravel's public directory.
+!backend/public/**/*.png
