@@ -29,7 +29,10 @@ Route::prefix('api')->group(function(){
   Route::patch('/orders/{order}/status',[ShopController::class,'status'])->whereNumber('order');
   Route::post('/products',[ShopController::class,'product']);
   Route::put('/products/{product}',[ShopController::class,'product'])->whereNumber('product');
-  Route::patch('/agents/{agent}',[ShopController::class,'agent'])->whereNumber('agent');
+  Route::get('/agents/{agent}',[\App\Http\Controllers\AgentController::class,'show'])->whereNumber('agent');
+  Route::get('/agents/{agent}/history',[\App\Http\Controllers\AgentController::class,'history'])->whereNumber('agent');
+  Route::put('/agents/{agent}',[\App\Http\Controllers\AgentController::class,'update'])->whereNumber('agent');
+  Route::patch('/agents/{agent}',[\App\Http\Controllers\AgentController::class,'status'])->whereNumber('agent');
   Route::post('/payouts',[ShopController::class,'payout']);
  });
 });

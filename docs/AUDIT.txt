@@ -64,3 +64,20 @@ earnings: 92.65 ms; JSON 6851 bytes; SQL 10 queries; rows 20
   delivery to an actual phone remains unverified and requires user opt-in.
 - Background worker is running in this temporary environment. Permanent deployments
   need HTTPS, stable VAPID keys, and a supervised Laravel queue worker (see README).
+
+2026-11-11 — Agent management and opening balances
+- Backend suite: 53 passed, 374 assertions on SQLite and MySQL 8.4.
+- Browser suite: 16 passed against dedicated aeae_testing MySQL database.
+- Added owner counts/all-status pagination; protected profile/status editor;
+  imported quantity and unpaid opening commission with a required cutoff date/reason.
+- All-time rankings include imported quantity; any date-bounded rankings exclude it.
+- Opening money is included in owner/agent balances and payout limits without fake
+  orders, inventory changes, or duplicate historical payouts.
+- Audit snapshots, owner-only access, stale version conflicts, overpayment protection,
+  and bounded history pagination verified. Mobile checks cover 320px/390px.
+- Found and fixed delayed search clearing resetting pagination after navigation.
+- Final production build passed. Final mobile history/date rendering check passed.
+- Existing independent-connection concurrency checks passed: one successful payout
+  and one rejected excess payout; one successful last-stock order and one rejection.
+- Live deployment was not performed. Apply the migration with migrate --force;
+  preserve production .env/APP_KEY/VAPID keys. See docs/deployment.md.

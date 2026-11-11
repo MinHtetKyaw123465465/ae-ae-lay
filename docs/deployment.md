@@ -52,3 +52,16 @@ then refresh the configuration cache. Existing installations keep their keys.
 Build locally from the repository root with `npm run build`. Commit the generated
 `backend/public` files together with the source changes. Node.js and Vite do not
 need to run on the live server. Check `/`, `/api/csrf`, and login after deployment.
+
+## ကိုယ်စားလှယ် အစလက်ကျန် ပြောင်းလဲမှု တင်ခြင်း
+
+၂၀၂၆-၁၁-၁၁ migration သည် `users` တွင် အစလက်ကျန်နှင့် စာရင်းဗားရှင်း ကော်လံများ၊
+`agent_changes` ပြင်ဆင်မှုမှတ်တမ်းဇယားကို ထည့်သည်။ ရှိပြီးသား အော်ဒါနှင့် ငွေရှင်းမှတ်တမ်းများကို
+မပြောင်းပါ။ အစလက်ကျန်မထည့်ရသေးသူများသည် ယခင်အတိုင်း ဆက်တွက်မည်။
+ဖိုင်အသစ်များနှင့် frontend build ကို တစ်ပြိုင်နက် တင်ပြီး အထက်ပါ `migrate --force`
+နှင့် cache/worker ပြန်စသည့် အဆင့်များကို ဆောင်ရွက်ပါ။ လုပ်ငန်းဒေတာတွင် `migrate:fresh`
+သို့မဟုတ် seeder မသုံးပါနှင့်။
+
+တင်ပြီးနောက် ပိုင်ရှင်အကောင့်ဖြင့် ကိုယ်စားလှယ်စုစုပေါင်း၊ ပြင်ဆင်ဖောင်၊ အစလက်ကျန်နှင့်
+ပြင်ဆင်မှုမှတ်တမ်းကို စစ်ပါ။ အရင်ရောင်းအားကို `အားလုံး` အဆင့်စာရင်းတွင်သာ ပေါင်းတွက်သည်။
+ကော်မရှင်အစလက်ကျန်သည် အရင်ပေးပြီးငွေ နုတ်ထားသော ကျန်ငွေဖြစ်ရမည်။

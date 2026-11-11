@@ -9,11 +9,9 @@ with zipfile.ZipFile(out,'w',zipfile.ZIP_DEFLATED) as archive:
         if not path.is_file():continue
         rel=path.relative_to(root)
         if any(part in excluded for part in rel.parts):continue
-        if path.name.startswith('.env') and path.name not in {'.env.example','.env.docker.example'}:continue
+        if path.name.startswith('.env') and path.name not in {'.env.example','.env.docker.example','.env.production.example'}:continue
         if '.sqlite' in path.name or path.name.endswith(('.log','.sql','.sql.gz','.pyc')):continue
         if str(rel).startswith(('backend/bootstrap/cache/','backend/storage/')) and path.name!='.gitignore':continue
-        if str(rel).startswith(('backend/public/assets/','backend/public/fonts/','backend/public/products/','backend/public/icons/')):continue
-        if str(rel) in {'backend/public/index.html','backend/public/sw.js','backend/public/manifest.webmanifest','backend/public/offline.html','backend/public/offline.css'}:continue
         if rel.parent==Path('.') and path.suffix=='.png':continue
         archive.write(path,Path('ae-ae')/rel)
 print(out)
