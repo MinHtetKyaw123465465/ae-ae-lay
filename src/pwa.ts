@@ -1,4 +1,3 @@
-import {API} from './data';
 export type ApiRequest=(path:string,method?:string,body?:unknown,signal?:AbortSignal)=>Promise<any>;
 type InstallEvent=Event&{prompt:()=>Promise<void>;userChoice:Promise<{outcome:'accepted'|'dismissed'}>};
 let installPrompt:InstallEvent|null=null,registration:Promise<ServiceWorkerRegistration>|null=null;
@@ -27,7 +26,7 @@ export async function enablePush(request:ApiRequest){
  // Permission is requested only in direct response to the user's button tap.
  let permission=Notification.permission;if(permission==='default')permission=await Notification.requestPermission();
  if(permission!=='granted')throw new Error(permission==='denied'?'ဘရောက်ဇာဆက်တင်တွင် အသိပေးချက်ကို ခွင့်ပြုပေးပါ။':'အသိပေးချက် ခွင့်မပြုရသေးပါ။');
- const settings=await request('/push/settings');if(!settings.configured)throw new Error('အသိပေးချက်ဝန်ဆောင်မှု အသင့်မဖြစ်သေးပါ။');
+ const settings=await request('/push/settings');if(!settings.configured)throw new Error('ဖုန်းအသိပေးချက်ကို ပိုင်ရှင်က စတင်ဖွင့်ပေးရန် လိုပါသည်။');
  const worker=await readyWorker();let subscription=await worker.pushManager.getSubscription();
  const desired=decodeKey(settings.public_key);const existing=subscription?.options.applicationServerKey;
  if(subscription&&existing&&Array.from(new Uint8Array(existing)).join(',')!==Array.from(desired).join(',')){await subscription.unsubscribe();subscription=null;}

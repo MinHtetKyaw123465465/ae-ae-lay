@@ -11,6 +11,7 @@ Route::prefix('api')->group(function(){
   Route::get('/notifications',[NotificationController::class,'index']);
   Route::patch('/notifications/read-all',[NotificationController::class,'readAll']);
   Route::patch('/notifications/{notification}/read',[NotificationController::class,'read'])->whereNumber('notification');
+  Route::post('/push/setup',[NotificationController::class,'setup'])->middleware('throttle:5,1,aeae-push-setup:');
   Route::get('/push/settings',[NotificationController::class,'settings']);
   Route::post('/push/test',[NotificationController::class,'test'])->middleware('throttle:3,1,aeae-push-test:');
   Route::post('/push/status',[NotificationController::class,'status']);
@@ -18,6 +19,8 @@ Route::prefix('api')->group(function(){
   Route::delete('/push/subscribe',[NotificationController::class,'unsubscribe']);
   Route::get('/me',function(Request $r){abort_unless($r->user()->status==='approved',403,'ပိုင်ရှင်၏ အတည်ပြုချက်ကို စောင့်ဆိုင်းပေးပါ။');return response()->json($r->user());});
   Route::post('/logout',[ShopController::class,'logout']);
+  Route::put('/account',[\App\Http\Controllers\AccountController::class,'update'])->middleware('throttle:10,1,aeae-account:');
+  Route::put('/agents/{agent}/password',[\App\Http\Controllers\AccountController::class,'resetAgentPassword'])->whereNumber('agent')->middleware('throttle:5,1,aeae-agent-password:');
   Route::put('/password',[ShopController::class,'password'])->middleware('throttle:5,1,aeae-password:');
   Route::get('/options/{type}',[ShopController::class,'options']);
   Route::get('/orders/export',[ShopController::class,'export'])->middleware('throttle:5,1,aeae-export:');

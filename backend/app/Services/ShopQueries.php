@@ -28,7 +28,7 @@ class ShopQueries {
  public function productQuery(bool $activeOnly=false):Builder {
   return DB::table('products')->when($activeOnly,fn($q)=>$q->where('active',true))->select(['id','name','description','price','commission','stock','active','lock_version'])->selectRaw("CASE WHEN image IN ('/products/cream.jpg','/products/lipstick.jpg') THEN image ELSE '' END AS image");
  }
- public function productRow($p){$p->active=(bool)$p->active;if($p->image==='')$p->image="/api/products/{$p->id}/image";return $p;}
+ public function productRow($p){$p->active=(bool)$p->active;if($p->image==='')$p->image="/api/products/{$p->id}/image?v={$p->lock_version}";return $p;}
  public function timestamp($row){foreach(['created_at','updated_at','sent_at'] as $key){if(isset($row->$key))$row->$key=Carbon::parse($row->$key,config('app.timezone'))->toIso8601String();}return $row;}
  public function page(Builder $query,Request $r,string $name,?int $size=null):array {
   $size??=(int)$r->query('per_page',10);$p=$query->paginate($size,['*'],$name.'_page',(int)$r->query($name.'_page',1));

@@ -1,0 +1,9 @@
+import {useState,type FormEvent} from 'react';
+import type {User} from './data';
+import type {ApiRequest} from './pwa';
+export default function ProfileEditor({user,request,onSaved}:{user:User;request:ApiRequest;onSaved:(u:User)=>void}){
+ const [account,setAccount]=useState(user),[busy,setBusy]=useState(false),[error,setError]=useState(''),[conflict,setConflict]=useState(false);
+ async function save(e:FormEvent<HTMLFormElement>){e.preventDefault();const values=Object.fromEntries(new FormData(e.currentTarget));setBusy(true);setError('');try{onSaved(await request('/account','PUT',{...values,agent_version:account.agent_version}))}catch(e){setError((e as Error).message);setConflict((e as Error&{status?:number}).status===409)}finally{setBusy(false)}}
+ async function reload(){setBusy(true);try{setAccount(await request('/me'));setError('');setConflict(false)}catch(e){setError((e as Error).message)}finally{setBusy(false)}}
+ return <form className="password-change account-editor" key={`${account.id}-${account.agent_version}`} onSubmit={save} aria-label="အကောင့်အချက်အလက် ပြင်ဆင်ရန်"><fieldset disabled={busy}><label>အမည်<input name="name" autoComplete="name" required maxLength={100} defaultValue={account.name}/></label><label>ဖုန်းနံပါတ်<input name="phone" type="tel" autoComplete="tel" inputMode="tel" pattern="09[0-9]{7,11}" maxLength={13} required defaultValue={account.phone}/></label><label>လက်ရှိစကားဝှက်<input name="current_password" type="password" autoComplete="current-password" maxLength={128} required/></label></fieldset><p className="form-note">နောက်တစ်ကြိမ်ဝင်လျှင် ဖုန်းနံပါတ်အသစ်ကို သုံးပါ။</p>{error&&<p className="form-error" role="alert">{error}</p>}{conflict&&<button type="button" className="button secondary" disabled={busy} onClick={reload}>လက်ရှိစာရင်း ပြန်ဖွင့်မည်</button>}<button className="button primary" disabled={busy||conflict}>သိမ်းဆည်းမည်</button></form>;
+}

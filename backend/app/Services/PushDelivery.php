@@ -13,6 +13,7 @@ class PushDelivery {
   $this->client=$client??new Client($options);
  }
  public function send(WebPushSubscription $device,array $payload):array {
+  if(!app(PushKeys::class)->configured())throw new \RuntimeException('Push settings are unavailable.');
   $push=new WebPush(['VAPID'=>['subject'=>config('webpush.subject'),'publicKey'=>config('webpush.public_key'),'privateKey'=>config('webpush.private_key')]],['TTL'=>86400,'urgency'=>'normal'],$this->client);
   $subscription=Subscription::create(['endpoint'=>$device->endpoint,'publicKey'=>$device->public_key,'authToken'=>$device->auth_token,'contentEncoding'=>'aes128gcm']);
   $result=$push->sendOneNotification($subscription,json_encode($payload,JSON_UNESCAPED_UNICODE),['topic'=>substr(hash('sha256',(string)$payload['id']),0,32)]);

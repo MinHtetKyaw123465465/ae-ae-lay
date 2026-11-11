@@ -81,3 +81,23 @@ earnings: 92.65 ms; JSON 6851 bytes; SQL 10 queries; rows 20
   and one rejected excess payout; one successful last-stock order and one rejection.
 - Live deployment was not performed. Apply the migration with migrate --force;
   preserve production .env/APP_KEY/VAPID keys. See docs/deployment.md.
+
+2026-11-11 — Uploaded photos, quantity editing, account management and push setup
+- MySQL suite: 63 passed, 450 assertions. SQLite suite also passed before final
+  message-only changes. Production TypeScript/Vite build passed.
+- Browser suite: 21 passed, including exact uploaded JPEG byte comparisons,
+  replacement image revisions, empty quantity editing, unique self-service phone
+  changes, owner password resets and session/remember-cookie invalidation.
+- Upload state is now controlled React state with preview, required image on new
+  products and no silent sample-photo default. Private image URLs carry revisions.
+- Owners can reset agent passwords with their own password; other users cannot.
+  Audit rows contain reset metadata only. Target push subscriptions are removed.
+- Own-profile edits require current password and optimistic version checks, cannot
+  promote roles/change balances, and are audited for agents.
+- Owner-only push initialization creates missing keys in encrypted private storage,
+  preserves existing environment keys, refuses silent repair/rotation of incomplete
+  or corrupt keys and works with cached configuration/running workers.
+- Phone push delivery still needs HTTPS, browser permission and a supervised queue
+  worker. Actual handset delivery has not been verified in this environment.
+- No production database or live website was modified. Previously lost photo uploads
+  must be selected again after deploying this fix.

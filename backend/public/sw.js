@@ -1,7 +1,7 @@
 /* Cache public application assets only. Authenticated API data is never cached. */
-const BUILD_ID = 'index-30sm1_tZjs-index-DAikCtMxcss';
+const BUILD_ID = 'index-BHzcWbbocss-index-CV8kclLKjs';
 const CACHE = 'aeae-static-' + BUILD_ID;
-const STATIC_ASSETS = ["/assets/index-30sm1_tZ.js","/assets/index-DAikCtMx.css"];
+const STATIC_ASSETS = ["/assets/index-BHzcWbbo.css","/assets/index-CV8kclLK.js"];
 const CORE = ['/offline.html','/offline.css','/manifest.webmanifest','/icons/aeae-180.png','/icons/aeae-192.png','/icons/aeae-512.png','/fonts/fonts.css','/fonts/noto-myanmar-400.ttf'];
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll([...CORE,...STATIC_ASSETS])).then(()=>self.skipWaiting()));});
 self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('aeae-static-')&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));});

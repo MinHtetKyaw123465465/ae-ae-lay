@@ -31,7 +31,7 @@ Artisan::command('app:prune-expired-cache',function(){
 \Illuminate\Support\Facades\Schedule::command('app:prune-expired-cache')->daily()->withoutOverlapping();
 
 Artisan::command('app:generate-push-keys {--force}',function(){
- if(config('webpush.private_key')&&!$this->option('force')){$this->info('အသိပေးချက်သော့ ရှိပြီးပါပြီ။');return;}
+ if(app(\App\Services\PushKeys::class)->configured()&&!$this->option('force')){$this->info('အသိပေးချက်သော့ ရှိပြီးပါပြီ။');return;}
  $keys=\Minishlink\WebPush\VAPID::createVapidKeys();$file=base_path('.env');$env=file_get_contents($file);
  foreach(['VAPID_PUBLIC_KEY'=>$keys['publicKey'],'VAPID_PRIVATE_KEY'=>$keys['privateKey']] as $name=>$value){$pattern='/^'.preg_quote($name,'/').'=.*$/m';$line=$name.'='.$value;$env=preg_match($pattern,$env)?preg_replace($pattern,$line,$env):$env."\n".$line."\n";}
  file_put_contents($file,$env,LOCK_EX);chmod($file,0600);if($this->option('force'))\App\Models\WebPushSubscription::query()->delete();$this->call('config:clear');$this->info('အသိပေးချက်သော့ ဖန်တီးပြီးပါပြီ။');
