@@ -3,6 +3,7 @@ require __DIR__.'/../../vendor/autoload.php';
 $app=require __DIR__.'/../../bootstrap/app.php';$app->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap();
 if(config('database.connections.'.config('database.default').'.database')!=='aeae_testing')throw new RuntimeException('This fixture is restricted to aeae_testing.');
 use Illuminate\Support\Facades\{DB,Hash};
+require __DIR__.'/browser-fixtures.php';
 $hash=Hash::make('LocalFixture2026!');$product=DB::table('products')->first();
 for($i=0;$i<35;$i++)DB::table('products')->insert(['name'=>'စမ်းသပ်ပစ္စည်း '.str_pad((string)$i,3,'0',STR_PAD_LEFT),'description'=>'စမ်းသပ်ပစ္စည်း အသေးစိတ်','price'=>35000,'commission'=>5000,'stock'=>500,'active'=>true,'image'=>'/products/cream.jpg','created_at'=>now(),'updated_at'=>now()]);
 for($i=0;$i<55;$i++){
