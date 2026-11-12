@@ -118,3 +118,15 @@ earnings: 92.65 ms; JSON 6851 bytes; SQL 10 queries; rows 20
 - Production build passed. Existing setup controls and push keys were preserved.
 - No live deployment/cron configuration was performed; see docs/deployment.md for the
   per-minute Hostinger cron command. Actual handset delivery remains unverified.
+
+2026-11-12 — Shared hosting uses schedule:run only
+- Registered the bounded notification drain every minute in Laravel's scheduler,
+  with a two-minute stale mutex expiry, an additional process lock and private logs.
+- Queue drain exits immediately when no ready jobs remain and stops taking new work
+  after the runtime limit. No separately configured worker or notification cron needed.
+- Backend suite: 70 passed, 489 assertions on SQLite and MySQL. Added regression
+  coverage for schedule frequency, timeout, overlap protection and output location.
+- Ran actual schedule:list and schedule:run against the isolated MySQL setup;
+  scheduled notification processing completed successfully and exited in one second.
+- Updated hosting instructions to one per-minute schedule:run cron. No live cron
+  configuration or production database changes were made.

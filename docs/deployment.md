@@ -35,15 +35,12 @@ After updating the code and environment, run from `backend`:
 php artisan optimize:clear
 php artisan migrate --force
 php artisan config:cache
-php artisan queue:restart
 ```
 
-Allow the PHP process to write to `storage` and `bootstrap/cache`. Keep a queue
-worker running for push delivery:
-
-```sh
-php artisan queue:work --sleep=3 --tries=3 --timeout=60
-```
+Allow the PHP process to write to `storage` and `bootstrap/cache`. On this shared
+hosting deployment, configure only `php artisan schedule:run` once per minute.
+Laravel schedules the bounded notification drain and daily maintenance internally;
+no separately managed worker process or notification cron is required.
 
 For a new installation, run `php artisan app:create-owner` to create the owner.
 If enabling push for the first time, run `php artisan app:generate-push-keys`,
@@ -69,7 +66,7 @@ need to run on the live server. Check `/`, `/api/csrf`, and login after deployme
 ## ဓာတ်ပုံနှင့် အကောင့်ပြင်ဆင်မှု အပ်ဒိတ်
 
 ဤအပ်ဒိတ်တွင် ဇယားအသစ်မလိုပါ။ အရင် migration များ အပြည့်အစုံ ရှိရမည်။
-Frontend build နှင့် PHP ကုဒ်ကို တွဲတင်ပြီး worker ကို ပြန်စပါ။ ရှိပြီးသား `.env`၊
+Frontend build နှင့် PHP ကုဒ်ကို တွဲတင်ပြီး scheduler cron ရှိကြောင်း စစ်ပါ။ ရှိပြီးသား `.env`၊
 `APP_KEY` နှင့် `storage/app/private` ကို ထိန်းထားပါ။ ယခင်အမှားကြောင့် နမူနာပုံသာ
 သိမ်းထားသော ပစ္စည်းများကို မူရင်းပုံ ပြန်ရွေးသိမ်းပေးရမည်။
 
@@ -77,8 +74,8 @@ VAPID သော့ မသတ်မှတ်ရသေးလျှင် ပို
 အက်ပ်မှ စတင်လျှင် `storage/app/private/push/vapid.enc` တွင် ဝှက်သိမ်းသည်။
 ယင်းဖိုင်နှင့် APP_KEY ကို တစ်ပြိုင်နက် ထိန်းထားပါ။ ရှိပြီးသား environment သော့နှစ်ခုကို
 ဆက်သုံးလျှင် ဖိုင်အသစ်မဖန်တီးပါ။ သော့တစ်ခုသာ သတ်မှတ်ထားလျှင် သို့မဟုတ် ဖိုင်ပျက်နေလျှင်
-သော့ကို အလိုအလျောက် မလဲဘဲ အမှားပြသည်။ ဖုန်းအသိပေးချက်အတွက် queue worker ကို
-ဆက်လက်လည်ပတ်စေရမည်။ အက်ပ်တွင်း ခေါင်းလောင်းစာရင်းသည် queue မလိုပါ။
+သော့ကို အလိုအလျောက် မလဲဘဲ အမှားပြသည်။ ဖုန်းအသိပေးချက်အတွက် scheduler cron ကို
+တစ်မိနစ်တစ်ကြိမ် ခေါ်ပေးရမည်။ အက်ပ်တွင်း ခေါင်းလောင်းစာရင်းသည် queue မလိုပါ။
 
 ## အက်ပ်ပိတ်ထားချိန် အသိပေးချက်နှင့် hosting cron
 
@@ -93,28 +90,31 @@ VAPID သော့ မသတ်မှတ်ရသေးလျှင် ပို
 အကောင့်ထွက်ခြင်း၊ အကောင့်ပြောင်းခြင်း၊ ဖုန်းချိတ်ဆက်မှု ပယ်ဖျက်ခြင်းနှင့် အကောင့်ရပ်ဆိုင်းခြင်းကို
 ဆက်ကာကွယ်ထားသည်။ ခေါင်းလောင်းနှင့် အော်ဒါအသေးစိတ် API များသည် အကောင့်ဝင်ရန် ဆက်လိုအပ်သည်။
 
-အမြဲလည်ပတ်သော Supervisor/systemd worker ရှိလျှင် ထို worker ကို ဆက်သုံးပြီး အပ်ဒိတ်တိုင်း
-`php artisan queue:restart` ပြုလုပ်ပါ။ Shared hosting တွင် `nohup` process ရပ်တတ်လျှင်
-**hPanel → Cron Jobs → Custom** မှ တစ်မိနစ်တစ်ကြိမ် အောက်ပါ command ကို သတ်မှတ်နိုင်သည်။
-PHP 8.4 လမ်းကြောင်းကို hosting terminal တွင် အရင်စစ်ပါ။
+Shared hosting အတွက် **hPanel → Cron Jobs → Custom** တွင် အောက်ပါ command
+တစ်ခုတည်းကို တစ်မိနစ်တစ်ကြိမ် သတ်မှတ်ပါ။ PHP 8.4 လမ်းကြောင်းကို hosting terminal တွင် စစ်ပါ။
 
 ```bash
-cd ~/domains/k2studioapp.com/public_html/ae-ae-lay/backend && /opt/alt/php84/usr/bin/php artisan app:work-notifications >> storage/logs/notification-worker.log 2>&1
+cd ~/domains/k2studioapp.com/public_html/ae-ae-lay/backend && /opt/alt/php84/usr/bin/php artisan schedule:run >> storage/logs/scheduler.log 2>&1
 ```
 
-ဤနေရာတွင် hPanel အချိန်အကွက်အားလုံးကို `*` ရွေးပါ။ SSH တွင် တစ်ကြိမ် run ရုံနှင့် cron
-အလိုအလျောက် မဖန်တီးပါ။ Command သည် အလုပ်များကို စက္ကန့် ၅၀ ခန့် စောင့်ယူပို့ပြီး ပြန်ပိတ်ကာ
-နောက်မိနစ်တွင် cron က ပြန်စသည်။ အရင် process မပြီးသေးလျှင် ထပ်မစအောင် ဖိုင် lock ဖြင့် ကာကွယ်သည်။
-ကြာမြင့်နေသော အလုပ်တစ်ခုကြောင့် process သက်တမ်း ပိုရှည်နိုင်ပြီး နောက် cron သည် ထပ်မစပါ။
-အမြဲလည်ပတ်သော worker နှင့် cron နည်းလမ်း နှစ်မျိုးလုံးကို တမင်ဖွင့်ထားရန် မလိုပါ။
-Cron ကြားကာလနှင့် hosting ကန့်သတ်ချက်ကြောင့် အသိပေးချက် ခဏနောက်ကျနိုင်သည်။
+အချိန်အကွက်အားလုံးကို `*` ရွေးပါ။ ရှိပြီးသား `schedule:run` cron ရှိလျှင် အသစ်ထပ်မထည့်ပါနှင့်။
+သီးခြား `app:work-notifications` cron၊ `nohup` သို့မဟုတ် အမြဲလည်ပတ်သော worker မလိုပါ။
+Laravel scheduler က အသိပေးချက်ပို့ရန် စောင့်နေသောအလုပ်များကို မိနစ်တိုင်း စတင်ဆောင်ရွက်မည်။
+အလုပ်မကျန်လျှင် ချက်ချင်းပြန်ပိတ်ပြီး အလုပ်များနေလျှင် ၄၅ စက္ကန့်အကြာ အလုပ်အသစ် ထပ်မယူတော့ပါ။
+စတင်ပို့နေသောအလုပ်ကိုတော့ ပြီးအောင် ဆက်လုပ်မည်။ မပြီးသေးသော process ကို ထပ်မစအောင်
+scheduler mutex နှင့် ဖိုင် lock နှစ်ဆင့် ကာကွယ်ထားသည်။ ပျက်သွားသော scheduler lock သည်
+၂ မိနစ်အကြာ သက်တမ်းကုန်ပြီး ပြန်လည်စတင်နိုင်သည်။ ကုန်ဆုံးယာယီဒေတာကိုလည်း နေ့စဉ် ရှင်းပေးသည်။
+
+Cron ကြားကာလကြောင့် ဖုန်းအသိပေးချက် တစ်မိနစ်ခန့် နောက်ကျနိုင်သည်။ အော်ဒါ၊ ကော်မရှင်နှင့်
+အကောင့်ဒေတာကို scheduler က မဖျက်ပါ။ `QUEUE_CONNECTION=database` ကို ဆက်သုံးပါ။
 
 စစ်ဆေးရန်—
 
 ```bash
+php artisan schedule:list
+php artisan schedule:run
 php artisan queue:failed
-php artisan app:work-notifications --max-time=10
 ```
 
-Worker မလည်လျှင် ခေါင်းလောင်းစာရင်း ရောက်နိုင်သော်လည်း ဖုန်း push မရောက်ပါ။ ဖုန်း၏ အသိပေးချက်ခွင့်ပြုမှု၊
-အင်တာနက်နှင့် OS/battery ကန့်သတ်ချက်များလည်း အကျုံးဝင်သည်။ `storage/logs` နှင့် worker log ကို စစ်ပါ။
+`storage/logs/scheduler.log` နှင့် `storage/logs/notification-worker.log` ကို စစ်နိုင်သည်။
+ဖုန်း၏ အသိပေးချက်ခွင့်ပြုမှု၊ အင်တာနက်နှင့် OS/battery ကန့်သတ်ချက်များလည်း အကျုံးဝင်သည်။

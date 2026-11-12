@@ -30,6 +30,11 @@ Artisan::command('app:prune-expired-cache',function(){
 })->purpose('Remove expired cache data without touching orders or accounts');
 \Illuminate\Support\Facades\Schedule::command('app:prune-expired-cache')->daily()->withoutOverlapping();
 
+// Shared hosting needs only one cron entry: php artisan schedule:run.
+\Illuminate\Support\Facades\Schedule::command('app:work-notifications --max-time=45')
+ ->everyMinute()->withoutOverlapping(2)
+ ->appendOutputTo(storage_path('logs/notification-worker.log'));
+
 Artisan::command('app:generate-push-keys {--force}',function(){
  if(app(\App\Services\PushKeys::class)->configured()&&!$this->option('force')){$this->info('အသိပေးချက်သော့ ရှိပြီးပါပြီ။');return;}
  $keys=\Minishlink\WebPush\VAPID::createVapidKeys();$file=base_path('.env');$env=file_get_contents($file);
