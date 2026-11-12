@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite --host 0.0.0.0",
     "build": "tsc --noEmit && vite build && node scripts/sync-build.mjs",
-    "test": "playwright test"
+    "test": "playwright test",
+    "test:worker": "node --test tests/Support/service-worker.cjs"
   },
   "dependencies": {
     "react": "^19.2.0",

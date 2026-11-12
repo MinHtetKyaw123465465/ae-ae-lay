@@ -4,6 +4,7 @@ import { mm, money, day, balances, statusText, API, type Data, type User, type P
 import DateFilter from './DateFilter';
 import AgentEditor from './AgentEditor';
 import ProfileEditor from './ProfileEditor';
+import {setPushRecipient} from './pushBinding';
 import { presetRange, rangeQuery, type DateRange } from './dateRange';
 import Pagination from './Pagination';
 import OptionSelect from './OptionSelect';
@@ -67,6 +68,7 @@ export default function App() {
       if(!res.ok)throw Object.assign(new Error(json.message||'တစ်ခုခု မှားယွင်းနေပါသည်။'),{status:res.status});return json;}catch(e){if(e instanceof TypeError)throw new Error('ဆာဗာနှင့် ချိတ်ဆက်၍ မရပါ။');throw e;}finally{timed.dispose()}
     }
     const features=useDeviceFeatures(user?.id||null,request);
+    useEffect(()=>{if(user)void setPushRecipient(user.id).catch(()=>{})},[user?.id]);
     const activeUserId=useRef(user?.id);activeUserId.current=user?.id;
     const pendingNavigation=useRef<{destination:string;resource_id:number|null}|null>((()=>{const q=new URLSearchParams(location.search);const destination=q.get('page');return destination?{destination,resource_id:Number(q.get('order'))||null}:null})());
     const navigation=useRef<(page:string,id:number|null)=>void>(()=>{});
@@ -82,7 +84,7 @@ export default function App() {
     useEffect(()=>{if(!user||page!=='leaderboard')return;const controller=new AbortController();setRankLoading(true);setRankError('');const q=rangeQuery(range)+'&rankings_page='+pages.rankings+'&per_page='+perPage;request('/rankings?'+q,'GET',undefined,controller.signal).then(body=>{setRankings(body.data);setRankMeta(body.meta)}).catch(e=>{if(e.name!=='AbortError'){setRankings([]);setRankError(e.message)}}).finally(()=>{if(!controller.signal.aborted)setRankLoading(false)});return()=>controller.abort()},[user,page,range,pages.rankings,perPage,revision]);
     async function logout() { setBusy(true); try {
         await request('/logout','POST',{push_endpoint:await currentPushEndpoint()});
-        void clearDeviceAfterLogout();
+        await setPushRecipient(null).catch(()=>{});void clearDeviceAfterLogout();
         setUser(null);
         setData(emptyData());
         setRankings([]);

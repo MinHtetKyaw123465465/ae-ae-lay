@@ -1,0 +1,14 @@
+import {test,expect,type Page} from '@playwright/test';
+import {createECDH,randomBytes} from 'node:crypto';
+async function login(p:Page){await p.goto('/');await p.getByLabel('ဖုန်းနံပါတ်').fill('09900000001');await p.getByLabel('စကားဝှက်',{exact:true}).fill('LocalFixture2026!');await p.getByRole('button',{name:'အကောင့်ဝင်မည်',exact:true}).click();await expect(p.getByRole('heading',{name:'အနှစ်ချုပ်',exact:true})).toBeVisible();}
+async function api(p:Page,path:string,method='GET',data?:unknown){const token=(await(await p.request.get('/api/csrf')).json()).token;const response=await p.request.fetch('/api'+path,{method,data,headers:{Accept:'application/json','X-CSRF-TOKEN':token}});expect(response.ok(),await response.text()).toBeTruthy();return response.json();}
+async function binding(p:Page){return p.evaluate(()=>new Promise<number|null>((resolve,reject)=>{const open=indexedDB.open('aeae-push-binding',1);open.onerror=()=>reject(open.error);open.onsuccess=()=>{const db=open.result;const request=db.transaction('settings','readonly').objectStore('settings').get('recipient');request.onsuccess=()=>{db.close();resolve(request.result??null)}}}));}
+test('background verification works without session cookies and logout clears local account binding',async({page,context,playwright,baseURL})=>{
+ await login(page);const me=await api(page,'/me');await expect.poll(()=>binding(page)).toBe(me.id);await api(page,'/push/setup','POST');const ec=createECDH('prime256v1');ec.generateKeys();const endpoint='https://fcm.googleapis.com/fcm/send/qa-background-'+Date.now();const anon=await playwright.request.newContext({baseURL});let subscribed=false;
+ try{
+  await api(page,'/push/subscribe','POST',{endpoint,keys:{p256dh:ec.getPublicKey().toString('base64url'),auth:randomBytes(16).toString('base64url')}});subscribed=true;
+  const verify=()=>anon.post('/api/push/verify',{data:{endpoint,recipient_id:me.id}});let response=await verify();expect(response.status()).toBe(200);expect(response.headers()['set-cookie']).toBeUndefined();expect(await response.json()).toEqual({allowed:true});expect((await anon.get('/api/me')).status()).toBe(401);
+  await context.clearCookies({name:'aeae_audit_session'});expect((await page.request.get('/api/me')).status()).toBe(401);expect(await binding(page)).toBe(me.id);response=await verify();expect(await response.json()).toEqual({allowed:true});
+  await login(page);await api(page,'/push/subscribe','DELETE',{endpoint});subscribed=false;response=await verify();expect(await response.json()).toEqual({allowed:false});await page.locator('.sidebar').getByRole('button',{name:'အကောင့်ထွက်မည်',exact:true}).click();await expect(page.locator('.auth-card')).toBeVisible();await expect.poll(()=>binding(page)).toBe(null);
+ }finally{await anon.dispose();if(subscribed)await api(page,'/push/subscribe','DELETE',{endpoint}).catch(()=>{});}
+});

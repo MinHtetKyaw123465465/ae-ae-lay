@@ -101,3 +101,20 @@ earnings: 92.65 ms; JSON 6851 bytes; SQL 10 queries; rows 20
   worker. Actual handset delivery has not been verified in this environment.
 - No production database or live website was modified. Previously lost photo uploads
   must be selected again after deploying this fix.
+
+2026-11-12 — Order push content and background delivery
+- Backend suite: 69 passed, 482 assertions on MySQL; earlier SQLite run also passed.
+- Browser suite: 22 passed. Service-worker harness: 6 passed.
+- Owner new-order notices now include product, Burmese quantity, order id and agent.
+  Agent sent/cancelled notices include the respective status and order/product/quantity.
+  Customer names, phone numbers and addresses remain excluded; long bodies are bounded.
+- Replaced cookie-dependent background checks with local account-id binding plus a
+  stateless capability check of the browser's private push endpoint. Anonymous browser
+  tests confirmed valid device checks work after session expiry and set no cookies.
+- Explicit logout clears local binding and revokes the selected device; other account
+  bindings, suspended accounts and revoked endpoints fail closed. Order APIs stay private.
+- Added bounded cron worker with nonblocking process lock and validated runtime limits;
+  tested overlapping invocation and a real one-second database queue worker lifecycle.
+- Production build passed. Existing setup controls and push keys were preserved.
+- No live deployment/cron configuration was performed; see docs/deployment.md for the
+  per-minute Hostinger cron command. Actual handset delivery remains unverified.

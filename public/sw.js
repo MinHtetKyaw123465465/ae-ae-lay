@@ -16,11 +16,20 @@ self.addEventListener('fetch',event=>{
 self.addEventListener('message',event=>{
  if(event.data?.type==='LOGOUT')event.waitUntil(self.registration.getNotifications().then(rows=>rows.forEach(row=>row.close())));
 });
+function boundRecipient(){return new Promise((resolve,reject)=>{
+ const open=indexedDB.open('aeae-push-binding',1);open.onupgradeneeded=()=>open.result.createObjectStore('settings');open.onerror=()=>reject(open.error);
+ open.onsuccess=()=>{const db=open.result;const request=db.transaction('settings','readonly').objectStore('settings').get('recipient');request.onsuccess=()=>{db.close();resolve(request.result)};request.onerror=()=>{db.close();reject(request.error)}};
+});}
 self.addEventListener('push',event=>{event.waitUntil((async()=>{
  let data;try{data=event.data?.json();}catch{return;}
  if(!data||!Number.isSafeInteger(data.id)||!Number.isSafeInteger(data.recipient_id))return;
- // A shared device must not display a previous account's notifications.
- try{const response=await fetch('/api/me',{credentials:'include',cache:'no-store'});if(!response.ok)return;const me=await response.json();if(me.id!==data.recipient_id)return;}catch{return;}
+ // Bind to the chosen account and verify device revocation without session cookies.
+ try{
+  if(await boundRecipient()!==data.recipient_id)return;
+  const subscription=await self.registration.pushManager.getSubscription();if(!subscription)return;
+  const response=await fetch('/api/push/verify',{method:'POST',credentials:'omit',cache:'no-store',headers:{'Content-Type':'application/json',Accept:'application/json'},body:JSON.stringify({endpoint:subscription.endpoint,recipient_id:data.recipient_id})});
+  if(!response.ok||!(await response.json()).allowed)return;
+ }catch{return;}
  const allowed=['dashboard','orders','agents','earnings'];const destination=allowed.includes(data.destination)?data.destination:'dashboard';
  await self.registration.showNotification(String(data.title||'Ae Ae Business'),{body:String(data.body||'အသိပေးချက်အသစ် ရှိသည်။'),icon:'/icons/aeae-192.png',badge:'/icons/aeae-192.png',tag:'aeae-'+data.id,renotify:false,data:{destination,resource_id:Number(data.resource_id)||null,id:data.id}});
  const clients=await self.clients.matchAll({type:'window',includeUncontrolled:true});clients.forEach(client=>client.postMessage({type:'NOTIFICATION_RECEIVED'}));

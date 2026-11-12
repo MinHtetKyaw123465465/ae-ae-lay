@@ -1,3 +1,4 @@
+import {setPushRecipient} from './pushBinding';
 export type ApiRequest=(path:string,method?:string,body?:unknown,signal?:AbortSignal)=>Promise<any>;
 type InstallEvent=Event&{prompt:()=>Promise<void>;userChoice:Promise<{outcome:'accepted'|'dismissed'}>};
 let installPrompt:InstallEvent|null=null,registration:Promise<ServiceWorkerRegistration>|null=null;
@@ -31,8 +32,8 @@ export async function enablePush(request:ApiRequest){
  const desired=decodeKey(settings.public_key);const existing=subscription?.options.applicationServerKey;
  if(subscription&&existing&&Array.from(new Uint8Array(existing)).join(',')!==Array.from(desired).join(',')){await subscription.unsubscribe();subscription=null;}
  try{subscription??=await worker.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:desired});}catch{throw new Error('ဖုန်းအသိပေးချက် ချိတ်ဆက်၍ မရပါ။ အင်တာနက်စစ်ပြီး ပြန်ကြိုးစားပါ။');}
- try{await request('/push/subscribe','POST',subscription.toJSON())}catch(error){await subscription.unsubscribe().catch(()=>{});throw error;}
+ try{const saved=await request('/push/subscribe','POST',subscription.toJSON());await setPushRecipient(saved.recipient_id)}catch(error){await subscription.unsubscribe().catch(()=>{});throw error;}
  await request('/push/test','POST').catch(()=>{});window.dispatchEvent(new Event('aeae:push-changed'));
 }
-export async function disablePush(request:ApiRequest){const r=await navigator.serviceWorker.getRegistration('/');const sub=await r?.pushManager.getSubscription();if(sub){await request('/push/subscribe','DELETE',{endpoint:sub.endpoint});await sub.unsubscribe();}r?.active?.postMessage({type:'LOGOUT'});window.dispatchEvent(new Event('aeae:push-changed'));}
-export async function clearDeviceAfterLogout(){try{const r=await navigator.serviceWorker.getRegistration('/');r?.active?.postMessage({type:'LOGOUT'});await(await r?.pushManager.getSubscription())?.unsubscribe();}catch{}window.dispatchEvent(new Event('aeae:push-changed'));}
+export async function disablePush(request:ApiRequest){const r=await navigator.serviceWorker.getRegistration('/');const sub=await r?.pushManager.getSubscription();if(sub){await request('/push/subscribe','DELETE',{endpoint:sub.endpoint});await sub.unsubscribe();}await setPushRecipient(null);r?.active?.postMessage({type:'LOGOUT'});window.dispatchEvent(new Event('aeae:push-changed'));}
+export async function clearDeviceAfterLogout(){try{await setPushRecipient(null);const r=await navigator.serviceWorker.getRegistration('/');r?.active?.postMessage({type:'LOGOUT'});await(await r?.pushManager.getSubscription())?.unsubscribe();}catch{}window.dispatchEvent(new Event('aeae:push-changed'));}

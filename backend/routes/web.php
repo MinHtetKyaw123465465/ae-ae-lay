@@ -4,6 +4,8 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\ShopController;
 use App\Http\Controllers\NotificationController;
 Route::prefix('api')->group(function(){
+ // The private browser push endpoint is a capability; no login cookie is needed.
+ Route::post('/push/verify',[NotificationController::class,'verify'])->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class,\Illuminate\Session\Middleware\StartSession::class,\Illuminate\View\Middleware\ShareErrorsFromSession::class])->middleware('throttle:600,1,aeae-push-verify:');
  Route::get('/csrf',fn()=>response()->json(['token'=>csrf_token()]));
  Route::post('/register',[ShopController::class,'register'])->middleware('throttle:5,1,aeae-register:');
  Route::post('/login',[ShopController::class,'login'])->middleware('throttle:shop-login');
