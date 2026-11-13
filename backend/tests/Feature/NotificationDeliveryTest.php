@@ -29,8 +29,8 @@ class NotificationDeliveryTest extends TestCase {
  }
  public function test_cron_worker_runs_the_database_queue_and_exits_without_a_permanent_process():void{config(['queue.default'=>'database']);$this->artisan('app:work-notifications',['--max-time'=>1])->assertSuccessful();}
  public function test_notification_task_is_scheduled_every_minute_with_bounded_runtime_and_overlap_protection():void{
-  $events=app(\Illuminate\Console\Scheduling\Schedule::class)->events();$matches=array_values(array_filter($events,fn($e)=>str_contains($e->command??'','app:work-notifications')));
-  $this->assertCount(1,$matches);$event=$matches[0];$this->assertSame('* * * * *',$event->expression);$this->assertStringContainsString('--max-time=45',$event->command);$this->assertTrue($event->withoutOverlapping);$this->assertSame(2,$event->expiresAt);$this->assertSame(storage_path('logs/notification-worker.log'),$event->output);$this->assertFalse($event->runInBackground);
+  $events=app(\Illuminate\Console\Scheduling\Schedule::class)->events();$matches=array_values(array_filter($events,fn($e)=>$e->description==='notifications:drain'));
+  $this->assertCount(1,$matches);$event=$matches[0];$this->assertSame('* * * * *',$event->expression);$this->assertInstanceOf(\Illuminate\Console\Scheduling\CallbackEvent::class,$event);$this->assertNull($event->command);$this->assertTrue($event->withoutOverlapping);$this->assertSame(2,$event->expiresAt);$this->assertSame('notifications:drain',$event->getSummaryForDisplay());$this->assertFalse($event->runInBackground);
  }
 
 }

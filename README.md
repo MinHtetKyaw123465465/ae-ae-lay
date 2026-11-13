@@ -212,3 +212,5 @@ php artisan optimize:clear
 ဆာဗာတွင် VAPID environment သော့နှစ်ခုလုံး မရှိမှသာ အက်ပ်က သော့အသစ်ဖန်တီးသည်။ ၎င်းကို `backend/storage/app/private/push/vapid.enc` တွင် လက်ရှိ `APP_KEY` ဖြင့် ဝှက်သိမ်းပြီး web root အပြင်၌ ထားသည်။ ရှိပြီးသား environment သော့များကို ဦးစားပေးပြီး တစ်စိတ်တစ်ပိုင်း/ပျက်နေသော သော့များကို အလိုအလျောက် မလဲပါ။ ထိုအခြေအနေကို ဆာဗာမှ ပြင်ဆင်ရမည်။ လက်ရှိ `APP_KEY`၊ `storage/app/private` နှင့် VAPID environment သော့များကို deployment နှင့် backup တွင် ထိန်းထားပါ။ စတင်ဖွင့်ခြင်းကို ထပ်နှိပ်လျှင် သော့မပြောင်းပါ။
 
 အက်ပ်ပိတ်ထားချိန် အသိပေးချက်ပို့ရန် ဆာဗာတွင် HTTPS နှင့် တစ်မိနစ်တစ်ကြိမ် `php artisan schedule:run` cron လိုအပ်သည်။ Scheduler က လက်ရှိသော့ကို ဖတ်ပြီး စောင့်နေသောအလုပ်များကို ပို့သည်။ အလုပ်မကျန်လျှင် ပြန်ပိတ်ပြီး နောက် cron တွင် ပြန်စသည်။ သီးခြား worker process မလိုပါ။ အသိပေးချက်သည် cron ကြားကာလကြောင့် တစ်မိနစ်ခန့် နောက်ကျနိုင်သည်။
+
+Shared hosting က `proc_open` ပိတ်ထားလျှင်လည်း scheduler tasks များကို လက်ရှိ PHP process ထဲမှာ တိုက်ရိုက်ခေါ်သည်။ `schedule:list` တွင် `notifications:drain` နှင့် `maintenance:prune-cache` ပေါ်ရမည်။ `storage/logs/notification-worker.log` မှ `START` / `EXIT` / `ERROR` ကို စစ်နိုင်သည်။

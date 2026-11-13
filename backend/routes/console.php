@@ -28,12 +28,12 @@ Artisan::command('app:prune-expired-cache',function(){
  \Illuminate\Support\Facades\DB::connection(config('cache.stores.database.lock_connection')??$connection)->table(config('cache.stores.database.lock_table')?:'cache_locks')->where('expiration','<',time())->delete();
  $this->info('Expired cache entries removed: '.$count);
 })->purpose('Remove expired cache data without touching orders or accounts');
-\Illuminate\Support\Facades\Schedule::command('app:prune-expired-cache')->daily()->withoutOverlapping();
+\Illuminate\Support\Facades\Schedule::call(new \App\Services\RunScheduledCommand('app:prune-expired-cache',[],'maintenance.log'))
+ ->name('maintenance:prune-cache')->daily()->withoutOverlapping();
 
 // Shared hosting needs only one cron entry: php artisan schedule:run.
-\Illuminate\Support\Facades\Schedule::command('app:work-notifications --max-time=45')
- ->everyMinute()->withoutOverlapping(2)
- ->appendOutputTo(storage_path('logs/notification-worker.log'));
+\Illuminate\Support\Facades\Schedule::call(new \App\Services\RunScheduledCommand('app:work-notifications',['--max-time'=>45],'notification-worker.log'))
+ ->name('notifications:drain')->everyMinute()->withoutOverlapping(2);
 
 Artisan::command('app:generate-push-keys {--force}',function(){
  if(app(\App\Services\PushKeys::class)->configured()&&!$this->option('force')){$this->info('အသိပေးချက်သော့ ရှိပြီးပါပြီ။');return;}

@@ -118,3 +118,20 @@ php artisan queue:failed
 
 `storage/logs/scheduler.log` နှင့် `storage/logs/notification-worker.log` ကို စစ်နိုင်သည်။
 ဖုန်း၏ အသိပေးချက်ခွင့်ပြုမှု၊ အင်တာနက်နှင့် OS/battery ကန့်သတ်ချက်များလည်း အကျုံးဝင်သည်။
+
+## proc_open ပိတ်ထားသော shared hosting
+
+Scheduled tasks များကို `Schedule::call` နှင့် `Artisan::call` ဖြင့် လက်ရှိ PHP process ထဲမှာပင်
+ဆောင်ရွက်သည်။ `proc_open`၊ shell command သို့မဟုတ် process အသစ် မလိုပါ။
+`schedule:list` တွင် `notifications:drain` (မိနစ်တိုင်း) နှင့် `maintenance:prune-cache`
+(နေ့စဉ်) ဟု မြင်ရမည်။ hPanel cron သည် ယခင်အတိုင်း `php artisan schedule:run` တစ်ခုတည်းဖြစ်သည်။
+
+အပ်ဒိတ်ပြီး `php artisan schedule:run -v` ဖြင့် စစ်လျှင် `notifications:drain ... DONE`
+နှင့် `storage/logs/notification-worker.log` ထဲမှာ `START` / `EXIT 0` စာကြောင်းများ ပေါ်ရမည်။
+အလုပ်မရှိလျှင်လည်း log ရေးမည်။ အမှားဖြစ်လျှင် `ERROR` / nonzero exit ဖြစ်ပြီး scheduler မှာ
+`FAIL` ပြမည်။ Queue database ချိတ်ဆက်မှုနှင့် jobs ဇယားရှိမှုကို အလုပ်မစမီ စစ်ပေးထားသည်။
+ထို့ကြောင့် connection ပျက်နေချိန် အလုပ်မပို့ဘဲ ပြီးဆုံးသွားခြင်းကို အောင်မြင်သည်ဟု မပြတော့ပါ။
+
+Web Push library ၏ optional GMP/BCMath notice ကို logger သို့ ပို့ထားသဖြင့် ယင်း notice တစ်ခုတည်းကြောင့်
+Laravel exception ဖြစ်ပြီး ပို့ဆောင်မှု ရပ်မသွားတော့ပါ။ curl၊ mbstring၊ openssl နှင့် မှန်ကန်သော
+VAPID သော့များတော့ ဆက်လိုအပ်သည်။ Production `.env`၊ APP_KEY နှင့် storage ကို မဖျက်ပါနှင့်။

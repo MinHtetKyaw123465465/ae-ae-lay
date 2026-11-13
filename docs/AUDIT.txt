@@ -130,3 +130,17 @@ earnings: 92.65 ms; JSON 6851 bytes; SQL 10 queries; rows 20
   scheduled notification processing completed successfully and exited in one second.
 - Updated hosting instructions to one per-minute schedule:run cron. No live cron
   configuration or production database changes were made.
+
+2026-11-13 — Confirmed Hostinger proc_open restriction
+- User confirmed CLI proc_open is unavailable. Reproduced old Laravel command event
+  falsely displaying DONE with no redirect log when Process construction throws.
+- Replaced both scheduled shell commands with named in-process callback events using
+  Artisan::call. Kept the one-minute schedule:run cron and overlap/process locks.
+- Task logger now writes START/EXIT even with no jobs, records sanitized error class,
+  and nonzero command results fail the callback. Queue health is checked before draining.
+- Passed PSR logger to WebPush so optional GMP/BCMath notices do not become Laravel
+  exceptions. Controlled encrypted transport probe passed with those notices simulated.
+- All 73 tests / 507 assertions passed with proc_open disabled on SQLite and MySQL.
+- Real MySQL integration probe, with proc_open disabled, consumed one SendShopPush job
+  exactly once through schedule:run using a controlled transport. All probe data cleaned.
+- No live server configuration changes, real push sends or native handset verification.
