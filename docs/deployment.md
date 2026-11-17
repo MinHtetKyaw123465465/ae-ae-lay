@@ -185,3 +185,28 @@ grep -n Telegram storage/logs/laravel*.log | tail -n 20
 
 Log တွင် order ID၊ HTTP/error code နှင့် exception class သာ ရေးသည်။ Bot Token၊ Chat ID၊
 စာအပြည့်နှင့် လိပ်စာကို မရေးပါ။ ဆာဗာ၏ HTTPS outbound/SSL အလုပ်လုပ်ရမည်။
+
+### System curl ချိတ်နိုင်သော်လည်း PHP Telegram ပို့မရခြင်း
+
+`curl -I https://api.telegram.org` မှ 302 ရလျှင် system curl က Telegram ကို ချိတ်နိုင်သည်။
+PHP ၏ cURL/SSL၊ DNS၊ IP family နှင့် timeout ဆက်တင်များက သီးခြားဖြစ်နိုင်သည်။
+ကုဒ်အသစ်မှ `php artisan app:telegram-test` သည် Token မဖော်ပြဘဲ cURL error အမှတ်ကို ပြသည်။
+6 = DNS၊ 7 = connection၊ 28 = timeout၊ 60/77 = certificate/CA ဆိုင်ရာ အမှားများဖြစ်သည်။
+Log တွင် `curl_errno` အမှတ်သာ ထပ်ရေးပြီး URL၊ exception message နှင့် Token ကို ဆက်ဖုံးထားသည်။
+
+ပုံမှန်စမ်းသပ်မှု မအောင်မြင်လျှင် IPv4 ကို တစ်ကြိမ်စမ်းနိုင်သည်—
+
+```bash
+php artisan app:telegram-test --ipv4
+```
+
+ဤ option သည် ဒီစမ်းသပ်မှုအတွက်သာ ဖြစ်ပြီး `.env` ကို မပြင်ပါ။ ပုံမှန်စမ်းသပ်မှု မအောင်မြင်ဘဲ
+IPv4 နဲ့သာ အောင်မြင်ကြောင်း သေချာမှ `.env` တွင် အောက်ပါလိုင်း ဖြည့်နိုင်သည်—
+
+```dotenv
+TELEGRAM_FORCE_IPV4=true
+```
+
+ထို့နောက် `php artisan config:clear` နှင့် `php artisan config:cache` ပြန်လုပ်ပါ။
+IPv4 option သည် certificate validation ကို ဆက်ထိန်းထားသည်။ SSL error ဖြစ်လျှင် PHP ၏
+CA certificate ဆက်တင်ကို ပြင်ရမည်။ Test command အောင်မြင်လျှင် စမ်းသပ်စာ တကယ်ပို့မည်။

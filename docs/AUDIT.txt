@@ -162,3 +162,14 @@ earnings: 92.65 ms; JSON 6851 bytes; SQL 10 queries; rows 20
 - All Telegram HTTP requests were faked; no real messages sent. Test configuration
   explicitly disables environment Telegram credentials to prevent accidental sends.
 - No live deployment or secret configuration performed. Setup is in docs/deployment.md.
+
+2026-11-17 — Safe Telegram connection diagnostics
+- System curl reached Telegram, but user's PHP request raised ConnectionException.
+  Exact production cause is still unconfirmed; no blanket certificate/IPv4 workaround.
+- Added numeric cURL errno extraction from nested Guzzle handler context or numeric
+  message prefix, without logging token-bearing URLs, full messages or handler context.
+- CLI reports DNS/connection/timeout/TLS categories. Optional --ipv4 applies only to
+  that test, restoring config afterward; permanent IPv4 is opt-in after confirmation.
+- 94 tests / 596 assertions passed with proc_open disabled. Covered error categories,
+  credential redaction, temporary IPv4 settings and preserved TLS verification.
+- No real Telegram messages, server secret changes or live deployment performed.

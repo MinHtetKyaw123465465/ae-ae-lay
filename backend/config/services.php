@@ -4,6 +4,7 @@ return [
     'telegram' => [
         'bot_token' => env('TELEGRAM_BOT_TOKEN', ''),
         'admin_chat_id' => env('TELEGRAM_ADMIN_CHAT_ID', ''),
+        'force_ipv4' => env('TELEGRAM_FORCE_IPV4', false),
     ],
 
     /*
