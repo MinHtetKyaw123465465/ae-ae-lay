@@ -24,10 +24,10 @@ class TelegramNotifications {
  public function sendOrder(int $id):bool {
   try{
    if(!$this->configured()){$this->failure='not_configured';return false;}
-   $order=DB::table('orders')->join('products','products.id','=','orders.product_id')->join('users','users.id','=','orders.agent_id')->where('orders.id',$id)->select('orders.id','orders.quantity','orders.address','products.name AS product','users.name AS agent')->first();
+   $order=DB::table('orders')->join('products','products.id','=','orders.product_id')->join('users','users.id','=','orders.agent_id')->where('orders.id',$id)->select('orders.id','orders.quantity','orders.customer','orders.phone','orders.address','products.name AS product','users.name AS agent')->first();
    if(!$order){$this->failure='order_not_found';return false;}
    $format=app(ShopNotifications::class);
-   $text="🛍 အော်ဒါအသစ် #".$format->number($order->id)."\n\nပစ္စည်း — ".$order->product."\nအရေအတွက် — ".$format->number($order->quantity)." ခု\nကိုယ်စားလှယ် — ".$order->agent."\n\nပို့ဆောင်ရန်လိပ်စာ —\n".$order->address;
+   $text="🛍 အော်ဒါအသစ် #".$format->number($order->id)."\n\nပစ္စည်း — ".$order->product."\nအရေအတွက် — ".$format->number($order->quantity)." ခု\nကိုယ်စားလှယ် — ".$order->agent."\n\nဝယ်သူအမည် — ".$order->customer."\nဖုန်းနံပါတ် — ".$order->phone."\n\nပို့ဆောင်ရန်လိပ်စာ —\n".$order->address;
    $payload=['text'=>$text];$base=rtrim((string)config('app.url'),'/');
    if(str_starts_with($base,'https://')&&filter_var($base,FILTER_VALIDATE_URL))$payload['reply_markup']=['inline_keyboard'=>[[['text'=>'အော်ဒါကြည့်မည်','url'=>$base.'/?page=orders&order='.$id]]]];
    return $this->send($payload,$id);

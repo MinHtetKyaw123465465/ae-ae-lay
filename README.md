@@ -218,7 +218,7 @@ Shared hosting က `proc_open` ပိတ်ထားလျှင်လည်း 
 ## Admin အတွက် Telegram
 
 အော်ဒါအသစ်ကို Admin ၏ Telegram Bot ဆီ တိုက်ရိုက်ပို့နိုင်သည်။ စာထဲတွင် ပစ္စည်း၊ အရေအတွက်၊
-ကိုယ်စားလှယ်၊ ပို့ဆောင်ရန်လိပ်စာနှင့် အော်ဒါလင့်ခ် ပါဝင်သည်။ Admin က Bot ကို Start နှိပ်ပြီး
+ကိုယ်စားလှယ်၊ ဝယ်သူအမည်၊ ဖုန်းနံပါတ်၊ ပို့ဆောင်ရန်လိပ်စာနှင့် အော်ဒါလင့်ခ် ပါဝင်သည်။ Admin က Bot ကို Start နှိပ်ပြီး
 `backend/.env` မှ `TELEGRAM_BOT_TOKEN` နှင့် `TELEGRAM_ADMIN_CHAT_ID` ကို ဖြည့်ပါ။ ထို့နောက်
 `php artisan config:cache` နှင့် `php artisan app:telegram-test` ဖြင့် စမ်းပါ။ Token ကို မမျှဝေပါနှင့်။
 Telegram အတွက် worker/cron မလိုပါ။ အော်ဒါ commit ပြီးမှ ပို့ပြီး၊ Telegram ပို့မရလည်း အော်ဒါနှင့်

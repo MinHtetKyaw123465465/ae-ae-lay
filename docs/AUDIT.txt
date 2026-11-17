@@ -173,3 +173,44 @@ earnings: 92.65 ms; JSON 6851 bytes; SQL 10 queries; rows 20
 - 94 tests / 596 assertions passed with proc_open disabled. Covered error categories,
   credential redaction, temporary IPv4 settings and preserved TLS verification.
 - No real Telegram messages, server secret changes or live deployment performed.
+
+2026-11-17 — Customer details, phone editing UX and production review
+- Admin Telegram new-order messages now include the full customer name and phone,
+  alongside product, quantity, agent, delivery address and authenticated order link.
+  Expanded the maximum Unicode payload test to include a 100-character emoji name,
+  20-digit phone and 1,000-character emoji address; it remains within Telegram's
+  4,096 UTF-16-unit limit. Messages remain plain text and sensitive content is not logged.
+- Mobile text inputs/selects/textareas now use 16px text. Modal placement is anchored
+  near the top with a stable small-viewport height and contained scrolling, reducing
+  keyboard-related viewport jumps. Resume events skip refresh while a modal/profile/
+  password form or text editor is active; duplicate resume checks are coalesced.
+- Found and removed nested pagination forms inside order forms. Page jumps now use
+  a group with explicit buttons/Enter handling, do not submit the surrounding form,
+  and invalid page text does not block order validation. Removed unintended nested
+  form padding that made phone product/agent pickers unnecessarily tall.
+- Production build passes. All 25 browser tests passed against the compiled Laravel
+  application (including install manifest/offline, roles, dates, profile/password,
+  uploads, notifications, bounded lists, 320/390/768px overflow and new focus tests).
+  All 94 backend tests / 596 assertions pass on SQLite with proc_open disabled and
+  MySQL. Six isolated service-worker tests pass. npm and Composer audits report no
+  known advisories at the time of checking. git diff --check passes.
+- Re-ran the isolated MySQL 50,000-added-order benchmark. Median service/query time:
+  first page 14.12ms, page 4,000 20.52ms, literal substring search 110.36ms,
+  rankings 88.47ms, earnings 90.55ms; peak PHP memory 26MB. Rows returned stay bounded.
+  See scale-benchmark.json. These are local service timings, not HTTP latency or
+  shared-hosting guarantees. Data is concentrated on one agent; this does not prove
+  performance at millions of orders, concurrent load, or a different database plan.
+- Two independent MySQL connections racing on the last stock item or commission
+  balance each yielded one 201 and one 422; final stock 0 and payout 8,000 as expected.
+- Reviewed auth/approval/role boundaries, CSRF/session/remember settings, password
+  rotation, input bounds, private uploads, literal SQL search, CSV formula handling,
+  idempotency, transactions/locks, paginated audit/notification history and no-cache
+  customer APIs. Existing protections remain covered by the regression suite.
+- Remaining operational limits: native Android/iOS keyboard dismissal was not
+  reproducible in browser emulation; verify on the affected handset after updating.
+  The resume/layout changes reduce interruption without forcing selection or focus.
+  Telegram still has a five-second timeout and no retry for ambiguous delivery;
+  Bell/order records remain available on failure. This review does not verify live
+  Hostinger settings, cron execution, backups/restoration or sustained production load.
+  At much higher volume, profile deep OFFSET pages and substring searches before
+  considering cursor/search indexing or maintained aggregate counters.

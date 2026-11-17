@@ -4,31 +4,45 @@
     "peak_php_mb": 26,
     "results": {
         "dashboard": {
-            "p50_ms": 57.22,
-            "max_ms": 86.52,
-            "json_bytes": 4046,
+            "p50_ms": 48.98,
+            "max_ms": 59.31,
+            "json_bytes": 4039,
             "sql_queries": 7,
             "returned_rows": 5
         },
         "orders_first": {
-            "p50_ms": 15.2,
-            "max_ms": 17.52,
-            "json_bytes": 6482,
+            "p50_ms": 14.12,
+            "max_ms": 19.82,
+            "json_bytes": 6504,
             "sql_queries": 6,
             "returned_rows": 10
         },
         "orders_deep": {
-            "p50_ms": 21.72,
-            "max_ms": 41.67,
-            "json_bytes": 6482,
+            "p50_ms": 20.52,
+            "max_ms": 40.25,
+            "json_bytes": 6514,
             "sql_queries": 6,
             "returned_rows": 10
         },
+        "orders_search": {
+            "p50_ms": 110.36,
+            "max_ms": 183.69,
+            "json_bytes": 6504,
+            "sql_queries": 6,
+            "returned_rows": 10
+        },
+        "rankings": {
+            "p50_ms": 88.47,
+            "max_ms": 97.81,
+            "json_bytes": 1184,
+            "sql_queries": 2,
+            "returned_rows": 10
+        },
         "earnings": {
-            "p50_ms": 92.65,
-            "max_ms": 96.12,
-            "json_bytes": 6851,
-            "sql_queries": 10,
+            "p50_ms": 90.55,
+            "max_ms": 185.41,
+            "json_bytes": 7722,
+            "sql_queries": 12,
             "returned_rows": 20
         }
     }
