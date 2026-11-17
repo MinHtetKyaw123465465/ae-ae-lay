@@ -144,3 +144,21 @@ earnings: 92.65 ms; JSON 6851 bytes; SQL 10 queries; rows 20
 - Real MySQL integration probe, with proc_open disabled, consumed one SendShopPush job
   exactly once through schedule:run using a controlled transport. All probe data cleaned.
 - No live server configuration changes, real push sends or native handset verification.
+
+2026-11-17 — Admin Telegram order notifications
+- Added direct Telegram sendMessage delivery after the order transaction commits,
+  with a five-second request timeout, no redirects and no worker/cron dependency.
+- Message includes order id, full product/quantity/agent, delivery address and an
+  authenticated HTTPS order link. Plain text only; no customer phone/name included.
+- Telegram uses only the configured positive private admin chat id. Secrets are
+  server-only config. Logs omit token, chat id, text/address and HTTP exception URLs.
+- Telegram/API/log failures cannot fail the committed order. No automatic retry of
+  ambiguous sends. Existing order UUID idempotency prevents duplicate sends on retries.
+- When configured, Telegram replaces new-order browser push for the admin; Bell and
+  existing agent status handling remain. Added safe CLI app:telegram-test feedback.
+- 85 tests / 562 assertions passed on SQLite and MySQL with proc_open disabled.
+  Covered commit/rollback, exact recipient/address, markup safety, error isolation,
+  redacted logs, missing config, no duplicate browser job and Telegram text limits.
+- All Telegram HTTP requests were faked; no real messages sent. Test configuration
+  explicitly disables environment Telegram credentials to prevent accidental sends.
+- No live deployment or secret configuration performed. Setup is in docs/deployment.md.

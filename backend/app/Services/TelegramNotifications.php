@@ -1,0 +1,42 @@
+<?php
+namespace App\Services;
+use Illuminate\Support\Facades\{DB,Http,Log};
+class TelegramNotifications {
+ private ?string $failure=null;
+ public function configured():bool {
+  $token=trim((string)config('services.telegram.bot_token',''));$chat=trim((string)config('services.telegram.admin_chat_id',''));
+  return strlen($token)<=256&&strlen($chat)<=32&&preg_match('/^[0-9]+:[A-Za-z0-9_-]+$/D',$token)===1&&preg_match('/^[1-9][0-9]*$/D',$chat)===1;
+ }
+ private function warn(string $message,array $context):void {
+  try{Log::warning($message,$context);}catch(\Throwable){} // Notification/log failures must not fail a committed order.
+ }
+ public function failureReason():?string{return $this->failure;}
+ public function sendOrder(int $id):bool {
+  try{
+   if(!$this->configured()){$this->failure='not_configured';return false;}
+   $order=DB::table('orders')->join('products','products.id','=','orders.product_id')->join('users','users.id','=','orders.agent_id')->where('orders.id',$id)->select('orders.id','orders.quantity','orders.address','products.name AS product','users.name AS agent')->first();
+   if(!$order){$this->failure='order_not_found';return false;}
+   $format=app(ShopNotifications::class);
+   $text="🛍 အော်ဒါအသစ် #".$format->number($order->id)."\n\nပစ္စည်း — ".$order->product."\nအရေအတွက် — ".$format->number($order->quantity)." ခု\nကိုယ်စားလှယ် — ".$order->agent."\n\nပို့ဆောင်ရန်လိပ်စာ —\n".$order->address;
+   $payload=['text'=>$text];$base=rtrim((string)config('app.url'),'/');
+   if(str_starts_with($base,'https://')&&filter_var($base,FILTER_VALIDATE_URL))$payload['reply_markup']=['inline_keyboard'=>[[['text'=>'အော်ဒါကြည့်မည်','url'=>$base.'/?page=orders&order='.$id]]]];
+   return $this->send($payload,$id);
+  }catch(\Throwable $error){$this->failure='internal_error';$this->warn('Telegram notification failed',['order_id'=>$id,'exception'=>get_class($error)]);return false;}
+ }
+ public function sendTest():bool{return $this->send(['text'=>'အဲအဲလေး Telegram အသိပေးချက် ချိတ်ဆက်ပြီးပါပြီ။']);}
+ private function send(array $payload,?int $order=null):bool {
+  $this->failure=null;if(!$this->configured()){$this->failure='not_configured';return false;}
+  try{
+   $payload['chat_id']=trim((string)config('services.telegram.admin_chat_id'));$payload['link_preview_options']=['is_disabled'=>true];
+   // No parse_mode: names and delivery addresses are plain text, never markup.
+   // Never retry an ambiguous timeout automatically; Telegram may already have sent it.
+   $response=Http::asJson()->acceptJson()->connectTimeout(3)->timeout(5)->withoutRedirecting()->post('https://api.telegram.org/bot'.trim((string)config('services.telegram.bot_token')).'/sendMessage',$payload);
+   if($response->successful()&&$response->json('ok')===true)return true;
+   $code=(int)$response->json('error_code',$response->status());$this->failure=match($code){401=>'invalid_token',403=>'chat_forbidden',400=>'invalid_chat',429=>'rate_limited',default=>'api_error'};
+   $this->warn('Telegram delivery failed',['order_id'=>$order,'http_status'=>$response->status(),'telegram_error_code'=>$code]);return false;
+  }catch(\Throwable $error){$this->failure='transport_error';
+   // HTTP exception messages/URLs may contain the bot token. Do not log them.
+   $this->warn('Telegram transport unavailable',['order_id'=>$order,'exception'=>get_class($error)]);return false;
+  }
+ }
+}

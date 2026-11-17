@@ -10,12 +10,16 @@ class ShopNotifications {
   if($agent!==null)$body.="\nကိုယ်စားလှယ် — ".Str::limit($agent,75,'…');
   return mb_substr($body,0,250);
  }
- public function record(int $recipient,string $type,string $title,string $body,string $destination,?int $resource=null):int {
+ public function record(int $recipient,string $type,string $title,string $body,string $destination,?int $resource=null,bool $push=true):int {
   $id=DB::table('shop_notifications')->insertGetId(['recipient_id'=>$recipient,'type'=>$type,'title'=>$title,'body'=>$body,'destination'=>$destination,'resource_id'=>$resource,'created_at'=>now(),'updated_at'=>now()]);
-  if(app(PushKeys::class)->configured()&&DB::table('web_push_subscriptions')->where('user_id',$recipient)->exists())SendShopPush::dispatch($id)->afterCommit();
+  if($push&&app(PushKeys::class)->configured()&&DB::table('web_push_subscriptions')->where('user_id',$recipient)->exists())SendShopPush::dispatch($id)->afterCommit();
   return $id;
  }
  public function owner(string $type,string $title,string $body,string $destination,?int $resource=null):void {
-  $id=DB::table('users')->where('role','owner')->where('status','approved')->value('id');if($id)$this->record($id,$type,$title,$body,$destination,$resource);
+  $id=DB::table('users')->where('role','owner')->where('status','approved')->value('id');if(!$id)return;
+  $telegram=$type==='order_created'&&$resource!==null&&app(TelegramNotifications::class)->configured();
+  $this->record($id,$type,$title,$body,$destination,$resource,push:!$telegram);
+  // Send once only after the order transaction commits and releases its locks.
+  if($telegram)DB::afterCommit(fn()=>app(TelegramNotifications::class)->sendOrder($resource));
  }
 }

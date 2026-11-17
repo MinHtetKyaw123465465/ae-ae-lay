@@ -214,3 +214,13 @@ php artisan optimize:clear
 အက်ပ်ပိတ်ထားချိန် အသိပေးချက်ပို့ရန် ဆာဗာတွင် HTTPS နှင့် တစ်မိနစ်တစ်ကြိမ် `php artisan schedule:run` cron လိုအပ်သည်။ Scheduler က လက်ရှိသော့ကို ဖတ်ပြီး စောင့်နေသောအလုပ်များကို ပို့သည်။ အလုပ်မကျန်လျှင် ပြန်ပိတ်ပြီး နောက် cron တွင် ပြန်စသည်။ သီးခြား worker process မလိုပါ။ အသိပေးချက်သည် cron ကြားကာလကြောင့် တစ်မိနစ်ခန့် နောက်ကျနိုင်သည်။
 
 Shared hosting က `proc_open` ပိတ်ထားလျှင်လည်း scheduler tasks များကို လက်ရှိ PHP process ထဲမှာ တိုက်ရိုက်ခေါ်သည်။ `schedule:list` တွင် `notifications:drain` နှင့် `maintenance:prune-cache` ပေါ်ရမည်။ `storage/logs/notification-worker.log` မှ `START` / `EXIT` / `ERROR` ကို စစ်နိုင်သည်။
+
+## Admin အတွက် Telegram
+
+အော်ဒါအသစ်ကို Admin ၏ Telegram Bot ဆီ တိုက်ရိုက်ပို့နိုင်သည်။ စာထဲတွင် ပစ္စည်း၊ အရေအတွက်၊
+ကိုယ်စားလှယ်၊ ပို့ဆောင်ရန်လိပ်စာနှင့် အော်ဒါလင့်ခ် ပါဝင်သည်။ Admin က Bot ကို Start နှိပ်ပြီး
+`backend/.env` မှ `TELEGRAM_BOT_TOKEN` နှင့် `TELEGRAM_ADMIN_CHAT_ID` ကို ဖြည့်ပါ။ ထို့နောက်
+`php artisan config:cache` နှင့် `php artisan app:telegram-test` ဖြင့် စမ်းပါ။ Token ကို မမျှဝေပါနှင့်။
+Telegram အတွက် worker/cron မလိုပါ။ အော်ဒါ commit ပြီးမှ ပို့ပြီး၊ Telegram ပို့မရလည်း အော်ဒါနှင့်
+Bell မှတ်တမ်း မပျက်ပါ။ ပို့မရသောစာကို အလိုအလျောက် ပြန်မပို့ပါ။ အသေးစိတ်ကို
+[တင်သွင်းနည်း](docs/deployment.md#admin-telegram-အော်ဒါအသိပေးချက်) တွင် ကြည့်ပါ။

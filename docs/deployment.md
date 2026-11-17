@@ -135,3 +135,53 @@ Scheduled tasks များကို `Schedule::call` နှင့် `Artisan:
 Web Push library ၏ optional GMP/BCMath notice ကို logger သို့ ပို့ထားသဖြင့် ယင်း notice တစ်ခုတည်းကြောင့်
 Laravel exception ဖြစ်ပြီး ပို့ဆောင်မှု ရပ်မသွားတော့ပါ။ curl၊ mbstring၊ openssl နှင့် မှန်ကန်သော
 VAPID သော့များတော့ ဆက်လိုအပ်သည်။ Production `.env`၊ APP_KEY နှင့် storage ကို မဖျက်ပါနှင့်။
+
+## Admin Telegram အော်ဒါအသိပေးချက်
+
+Telegram သည် **အော်ဒါအသစ်တင်ပြီးတိုင်း သတ်မှတ်ထားသော Admin ၏ ကိုယ်ပိုင် Chat ID ဆီသာ** ပို့သည်။
+ပစ္စည်းအမည်၊ အရေအတွက်၊ ကိုယ်စားလှယ်အမည်၊ ပို့ဆောင်ရမည့်လိပ်စာနှင့် အော်ဒါကြည့်ရန်ခလုတ် ပါသည်။
+ဝယ်သူဖုန်းနှင့် ဝယ်သူအမည်ကို Telegram စာထဲ မထည့်ပါ။ စာသားကို plain text ဖြင့် ပို့သည်။
+အော်ဒါကြည့်ရန်ခလုတ်သည် လက်ရှိ Webapp ကို ဖွင့်ပြီး လိုအပ်လျှင် အကောင့်ဝင်ရမည်။ `APP_URL`
+ကို အမြဲတမ်း HTTPS လိပ်စာအမှန် သတ်မှတ်ထားပါ။
+
+1. Admin က @BotFather မှ Bot ဖန်တီးပြီး ကိုယ့် Bot ကို **Start** နှိပ်ထားပါ။
+2. Hostinger File Manager မှ လက်ရှိ `backend/.env` ကို ပြင်ပါ။ Token ကို ချတ်၊ GitHub၊
+   screenshot နှင့် terminal command history ထဲ မထည့်ပါနှင့်။ Chat ID သည် Admin ကိုယ်ပိုင်
+   အကောင့်၏ အပေါင်းကိန်းဖြစ်ရမည်။ `Id:` စာသားကို မထည့်ပါနှင့်။
+
+```dotenv
+TELEGRAM_BOT_TOKEN=your_botfather_token
+TELEGRAM_ADMIN_CHAT_ID=your_numeric_private_chat_id
+```
+
+3. ဆာဗာမှာ code အသစ် pull လုပ်ပြီး `.env` ဖြည့်ပြီးနောက် `backend` မှ—
+
+```bash
+php artisan config:clear
+php artisan config:cache
+php artisan app:telegram-test
+```
+
+Test command သည် Admin ဆီ စမ်းသပ်စာတစ်စောင် တကယ်ပို့သည်။ ပို့မရလျှင် Token၊ Chat ID၊
+Start/block ပြဿနာ သို့မဟုတ် ကွန်ယက်အမှားအမျိုးအစားကို ပြပြီး Token ကို မဖော်ပြပါ။
+
+အော်ဒါကို transaction commit လုပ်ပြီး lock များလွှတ်ပြီးမှ Telegram API ကို တိုက်ရိုက်ခေါ်သည်။
+Worker၊ cron၊ browser push ခွင့်ပြုချက် မလိုပါ။ Telegram response ကြောင့် အော်ဒါတင်ပြီးကြောင်း
+တုံ့ပြန်ချိန် ၅ စက္ကန့်အထိ ထပ်စောင့်ရနိုင်သည်။ Telegram ပို့မရလည်း အော်ဒါနှင့် Bell မှတ်တမ်း
+ကို သိမ်းထားသည်။ Timeout ကို အလိုအလျောက် ထပ်မပို့ပါ—ပထမအကြိမ် Telegram က လက်ခံပြီးသား
+ဖြစ်နေနိုင်သောကြောင့် စာနှစ်ခါရောက်ခြင်းကို ရှောင်ထားသည်။ API rate limit၊ timeout သို့မဟုတ်
+bot ပိတ်ထားခြင်းကြောင့် မရောက်သောစာအတွက် အလိုအလျောက် ပြန်ပို့မည့် queue မရှိပါ။
+
+Telegram သတ်မှတ်ပြီးလျှင် Admin ၏ အော်ဒါအသစ်အတွက် browser push အလုပ်ကို ထပ်မတင်တော့ပါ။
+အက်ပ်အတွင်း Bell၊ ကိုယ်စားလှယ်၏ မူလအခြေအနေအသိပေးချက်နှင့် အခြား scheduler အလုပ်များကို ဆက်ထိန်းထားသည်။
+Telegram ဆက်တင်နှစ်ခုလုံး အလွတ်ဖြစ်လျှင် မူလ notification နည်းလမ်းအတိုင်း ဆက်လုပ်သည်။
+ရှိပြီးသား ဒေတာကို မဖျက်ပါ။ Migration၊ Composer package အသစ်နှင့် frontend build အသစ် မလိုပါ။
+
+စစ်ဆေးရန်—
+
+```bash
+grep -n Telegram storage/logs/laravel*.log | tail -n 20
+```
+
+Log တွင် order ID၊ HTTP/error code နှင့် exception class သာ ရေးသည်။ Bot Token၊ Chat ID၊
+စာအပြည့်နှင့် လိပ်စာကို မရေးပါ။ ဆာဗာ၏ HTTPS outbound/SSL အလုပ်လုပ်ရမည်။
